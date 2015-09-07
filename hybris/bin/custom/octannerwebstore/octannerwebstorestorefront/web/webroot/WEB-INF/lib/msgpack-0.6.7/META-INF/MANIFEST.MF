@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1355032760079
+Build-Jdk: 1.6.0_37
+Built-By: muga
+Bundle-Description: MessagePack for Java is a binary-based efficient obj
+ ect      serialization library in Java.
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: MessagePack for Java
+Bundle-SymbolicName: org.msgpack
+Bundle-Version: 0.6.7
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.apache.harmony.beans;version="0.6.7",org.msgpack.ann
+ otation;uses:="org.msgpack.template";version="0.6.7",org.msgpack.io;ver
+ sion="0.6.7",org.msgpack;uses:="org.msgpack.packer,org.msgpack.template
+ ,org.msgpack.unpacker,org.msgpack.type";version="0.6.7",org.msgpack.pac
+ ker;uses:="org.msgpack,org.msgpack.template,org.msgpack.type,org.msgpac
+ k.io";version="0.6.7",org.msgpack.template;uses:="org.msgpack.packer,or
+ g.msgpack.unpacker,org.msgpack,org.msgpack.template.builder,org.msgpack
+ .type";version="0.6.7",org.msgpack.template.builder;uses:="org.msgpack.
+ template,javassist,org.msgpack.annotation,org.msgpack.packer,org.msgpac
+ k,org.msgpack.unpacker,org.msgpack.template.builder.beans";version="0.6
+ .7",org.msgpack.template.builder.beans;uses:="org.apache.harmony.beans,
+ org.xml.sax,org.xml.sax.helpers,javax.xml.parsers";version="0.6.7",org.
+ msgpack.type;uses:="org.msgpack,org.msgpack.packer";version="0.6.7",org
+ .msgpack.unpacker;uses:="org.msgpack.template,org.msgpack,org.msgpack.p
+ acker,org.msgpack.type,org.msgpack.io";version="0.6.7",org.msgpack.util
+ .json;uses:="org.msgpack.packer,org.msgpack,org.msgpack.unpacker,org.ms
+ gpack.io,org.json.simple.parser,org.msgpack.type";version="0.6.7",org.m
+ sgpack.util;uses:="javax.tools,org.msgpack.template,org.msgpack.templat
+ e.builder";version="0.6.7"
+Import-Package: javassist,javax.tools,javax.xml.parsers,org.json.simple.
+ parser;version="[1.1,2)",org.xml.sax,org.xml.sax.helpers
+Tool: Bnd-1.50.0
