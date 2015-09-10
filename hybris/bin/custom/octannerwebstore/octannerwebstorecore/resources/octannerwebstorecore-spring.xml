@@ -576,7 +576,7 @@
     </bean>
 
 
- <!--  <alias alias="cartFactory" name="octannerCartFactory"/>
+    <alias alias="cartFactory" name="octannerCartFactory"/>
     <bean id="octannerCartFactory" class="com.octanner.core.custom.OctannerCartFactory" parent="defaultCartFactory">
         <property name="keyGenerator" ref="cartCodeGenerator"/>
     </bean>
@@ -587,7 +587,7 @@
         <property name="start" value="${keygen.cart.code.start}"/>
         <property name="type" value="${keygen.cart.code.type}"/>
         <property name="template" value="${keygen.cart.code.template}"/>
-    </bean> -->
+    </bean>
 
     <bean id="auditOrderRejection"
           class="de.hybris.platform.b2b.process.approval.actions.SystemAuditAction"
