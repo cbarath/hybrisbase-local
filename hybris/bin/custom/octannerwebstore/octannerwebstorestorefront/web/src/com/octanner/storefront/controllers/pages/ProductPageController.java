@@ -11,8 +11,9 @@
  *
  *
  */
-package com.octanner.storefront.controllers.pages;
+package de.hybris.platform.yb2bacceleratorstorefront.controllers.pages;
 
+import com.octanner.storefront.controllers.pages.AbstractPageController;
 import de.hybris.platform.acceleratorservices.controllers.page.PageType;
 import de.hybris.platform.b2bacceleratorfacades.futurestock.B2BFutureStockFacade;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
@@ -26,6 +27,7 @@ import de.hybris.platform.commercefacades.product.data.ImageDataType;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commercefacades.product.data.ReviewData;
 import de.hybris.platform.commerceservices.url.UrlResolver;
+import de.hybris.platform.product.ProductService;
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import de.hybris.platform.util.Config;
 import com.octanner.storefront.breadcrumb.impl.ProductBreadcrumbBuilder;
@@ -109,6 +111,9 @@ public class ProductPageController extends AbstractPageController
 	@Resource(name = "b2bFutureStockFacade")
 	private B2BFutureStockFacade b2bFutureStockFacade;
 
+	@Resource(name = "productService")
+	private ProductService productService;
+
 	@RequestMapping(value = PRODUCT_CODE_PATH_VARIABLE_PATTERN, method = RequestMethod.GET)
 	public String productDetail(@PathVariable("productCode") final String productCode, final Model model,
 			final HttpServletRequest request, final HttpServletResponse response) throws CMSItemNotFoundException,
@@ -121,6 +126,8 @@ public class ProductPageController extends AbstractPageController
 		{
 			return redirection;
 		}
+
+		addProductToRequestContext(productCode, request);
 
 		updatePageTitle(productData, model);
 		final List<ProductOption> extraOptions = Arrays.asList(ProductOption.VARIANT_MATRIX_BASE, ProductOption.VARIANT_MATRIX_URL,
@@ -146,8 +153,7 @@ public class ProductPageController extends AbstractPageController
 
 		populateProductDetailForDisplay(productCode, model, request, extraOptions);
 
-		if (!model.containsAttribute(WebConstants.MULTI_DIMENSIONAL_PRODUCT))
-		{
+		if (!model.containsAttribute(WebConstants.MULTI_DIMENSIONAL_PRODUCT)) {
 			return REDIRECT_PREFIX + productDataUrlResolver.resolve(productData);
 		}
 
@@ -250,6 +256,8 @@ public class ProductPageController extends AbstractPageController
 			final HttpServletRequest request)
 	{
 
+		addProductToRequestContext(productCode, request);
+
 		final ProductData productData = productFacade.getProductForCodeAndOptions(productCode, Arrays.asList(ProductOption.BASIC,
 				ProductOption.PRICE, ProductOption.SUMMARY, ProductOption.DESCRIPTION, ProductOption.CATEGORIES,
 				ProductOption.PROMOTIONS, ProductOption.STOCK, ProductOption.REVIEW, ProductOption.VOLUME_PRICES));
@@ -292,6 +300,8 @@ public class ProductPageController extends AbstractPageController
 	{
 		final ProductData productData = productFacade.getProductForCodeAndOptions(productCode, null);
 
+		addProductToRequestContext(productCode, request);
+
 		final List<ReviewData> reviews;
 
 		if ("all".equals(numberOfReviews))
@@ -310,8 +320,7 @@ public class ProductPageController extends AbstractPageController
 		return ControllerConstants.Views.Fragments.Product.ReviewsTab;
 	}
 
-	protected void updatePageTitle(final ProductData productData, final Model model)
-	{
+	protected void updatePageTitle(final ProductData productData, final Model model) {
 		storeContentPageTitleInModel(model, getPageTitleResolver().resolveProductPageTitle(productData.getCode()));
 	}
 
@@ -327,6 +336,7 @@ public class ProductPageController extends AbstractPageController
 			final List<ProductOption> extraOptions) throws CMSItemNotFoundException
 	{
 
+		addProductToRequestContext(productCode, request);
 
 		final List<ProductOption> options = new ArrayList<>(Arrays.asList(ProductOption.VARIANT_FIRST_VARIANT, ProductOption.BASIC,
 				ProductOption.URL, ProductOption.PRICE, ProductOption.SUMMARY, ProductOption.DESCRIPTION, ProductOption.GALLERY,
@@ -433,4 +443,8 @@ public class ProductPageController extends AbstractPageController
 		return galleryImages;
 	}
 
+	protected void addProductToRequestContext(final String code, final HttpServletRequest request)
+	{
+		getRequestContextData(request).setProduct(productService.getProduct(code));
+	}
 }
