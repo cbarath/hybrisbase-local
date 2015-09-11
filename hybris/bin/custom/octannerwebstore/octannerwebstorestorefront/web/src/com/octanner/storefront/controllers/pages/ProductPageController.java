@@ -11,9 +11,9 @@
  *
  *
  */
-package de.hybris.platform.yb2bacceleratorstorefront.controllers.pages;
+package com.octanner.storefront.controllers.pages;
 
-import com.octanner.storefront.controllers.pages.AbstractPageController;
+//import com.octanner.storefront.controllers.pages.AbstractPageController;
 import de.hybris.platform.acceleratorservices.controllers.page.PageType;
 import de.hybris.platform.b2bacceleratorfacades.futurestock.B2BFutureStockFacade;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
