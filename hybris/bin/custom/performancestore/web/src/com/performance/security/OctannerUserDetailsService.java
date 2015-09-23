@@ -16,6 +16,7 @@ package com.performance.security;
 import com.octanner.auth.OCTannerAuth;
 import com.octanner.auth.OCTannerAuthData;
 import com.octanner.auth.impl.OCTannerAuthImpl;
+import com.octanner.core.model.CustomPriceRowModel;
 import com.performance.controllers.pages.AbstractLoginPageController;
 import com.performance.controllers.pages.LoginPageController;
 import com.performance.custom.OctannerAutoLogin;
@@ -25,15 +26,19 @@ import de.hybris.platform.b2b.model.B2BCustomerModel;
 import de.hybris.platform.b2b.services.B2BCustomerService;
 import de.hybris.platform.b2b.services.B2BUnitService;
 import de.hybris.platform.commerceservices.customer.CustomerAccountService;
+import de.hybris.platform.core.PK;
 import de.hybris.platform.core.Registry;
 import de.hybris.platform.core.model.ItemModel;
 import de.hybris.platform.core.model.order.OrderModel;
 import de.hybris.platform.core.model.security.PrincipalGroupModel;
 import de.hybris.platform.core.model.user.UserModel;
+import de.hybris.platform.europe1.model.PriceRowModel;
 import de.hybris.platform.persistence.SystemEJB;
 import de.hybris.platform.persistence.security.EJBCannotDecodePasswordException;
 import de.hybris.platform.persistence.security.PasswordEncoder;
+import de.hybris.platform.product.PriceService;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.servicelayer.session.SessionService;
 import de.hybris.platform.servicelayer.user.UserService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -74,81 +79,112 @@ public class OctannerUserDetailsService implements UserDetailsService
 	@Autowired
 	public UserModel userModel;
 
+	//@Resource
+	//public CustomPriceRowModel customPriceRowModel;
+
+	@Autowired
+	public SessionService sessionService;
+
+	@Autowired
+	PriceService priceService;
+
 	/** The auto login strategy. */
 	/* @Autowired
 	private OctannerAutoLogin ocTannerAutoLoginStrategy; */
 
+
 	public UserDetails loadUserByUsername(String bearerToken)
 			throws UsernameNotFoundException, DataAccessException
 	{
-		System.out.println("bearrerToken recieved :: " + bearerToken);
-		UserDetails user=null;
-		OCTannerAuthData oCTannerAuthData=null;
-		try {
+		OCTannerAuthData oCTannerAuthData = null;
 		oCTannerAuthData = getOCTTokenData(bearerToken);
-		System.out.println(ToStringBuilder.reflectionToString(oCTannerAuthData));
-		StringUtils.isBlank("");
-		@SuppressWarnings("deprecation")
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new GrantedAuthorityImpl("ROLE_USER"));
+		String u = oCTannerAuthData.getUserId();
+		String x = oCTannerAuthData.getClientId();
+		String userid = u+"@"+x;                                            //User UID   //String userid = StringUtils.lowerCase(oCTannerAuthData.getUserId());
+		userModel = userService.getUserForUID(userid);
 
-
-			user = new User(bearerToken, "password", true, true, true, true, authorities);
-
-		}catch(Exception e)
+		if((userService.isUserExisting(userid) && !(userModel.isLoginDisabled())))
 		{
-			System.out.println("exception while loggin in , will throw  UsernameNotFoundException:: " + e.getMessage());
-			throw new UsernameNotFoundException("exception while crating user object",e);
-		}
-		 final int userpoints = 1000;                                                           //Userpoints
+			System.out.println("bearrerToken recieved :: " +bearerToken);
+			UserDetails user = null;
+			try {
+				//oCTannerAuthData = getOCTTokenData(bearerToken);
+				System.out.println(ToStringBuilder.reflectionToString(oCTannerAuthData));
+				StringUtils.isBlank("");
+				@SuppressWarnings("deprecation")
+				List<GrantedAuthority> authorities = new ArrayList<>();
+				authorities.add(new GrantedAuthorityImpl("ROLE_USER"));
+				user = new User(bearerToken, "password", true, true, true, true, authorities);
 
-		String userid = StringUtils.lowerCase(oCTannerAuthData.getUserId());                   //User UID
-		System.out.println("*************User id is***********" + " " +userid);
+				Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 
 
-		userModel =userService.getUserForUID(userid);
-		System.out.println("***Checking if user is disabled or not***" + userModel.isLoginDisabled());    //checking user disabled or not.
+			} catch (Exception e) {
+				System.out.println("Exception while logging in , will throw  UsernameNotFoundException:: " + e.getMessage());
+				throw new UsernameNotFoundException("exception while creating user object", e);
+			}
+			//final int userpoints = 1000;                                                           //Userpoints
+			final String cf = "2";                                                                        // conversion facto
+			// sessionService.setAttribute("UNIT_FACTOR", cf);
 
 
-		String encod = userModel.getPasswordEncoding();
-		System.out.println("User encoding  is " +encod);        //get encoding type for password
+			System.out.println("*************User id is***********" + " " + userid);
+			System.out.println("***Checking if user is disabled or not***" + userModel.isLoginDisabled());    //checking user disabled or not.
 
-		String encodpass = userModel.getEncodedPassword();
-		//System.out.println("User pass  is " +encodpass);      //get the encoded password
 
-		final PasswordEncoder enc = Registry.getCurrentTenant().getJaloConnection().getPasswordEncoder(encod);
-		String userpass ="";
-		try {
-			userpass = enc.decode(encodpass);
-			System.out.println("User  password  is " +userpass);    //gets the password
-		}
-		catch(EJBCannotDecodePasswordException e)
-		{
-			e.printStackTrace();
-		}
+			String encod = userModel.getPasswordEncoding();
+			System.out.println("User encoding  is " + encod);        //get encoding type for password
 
-		if((userService.isUserExisting(StringUtils.lowerCase(oCTannerAuthData.getUserId()))) && !(userModel.isLoginDisabled()))
-		{
-		System.out.println("******************user exists in Hybris****************");
+			String encodpass = userModel.getEncodedPassword();
+			//System.out.println("User pass  is " +encodpass);      //get the encoded password
+
+			final PasswordEncoder enc = Registry.getCurrentTenant().getJaloConnection().getPasswordEncoder(encod);
+			String userpass = "";
+			try {
+				userpass = enc.decode(encodpass);
+				System.out.println("User  password  is " + userpass);    //gets the password
+			} catch (EJBCannotDecodePasswordException e) {
+				e.printStackTrace();
+			}
+
+
+			System.out.println("******************user exists in Hybris****************");
 			Collection<OrderModel> orders = userModel.getOrders();
 			System.out.println("Number of orders is:" + " :" + orders.size());
 
 
+			//PriceRowModel priceRow = new PriceRowModel();
+			//modelService.create(PriceRowModel.class);
 
+			//priceRow.setUnitFactor(2);
+			//modelService.save(priceRow);
+
+
+			// (CustomPriceRowModel) modelService.get(PK.parse(""));
+
+			//customPriceRowModel.getOctcf();
+			//modelService.save(customPriceRowModel);
+
+			//modelService.save(customPriceRowModel);
+
+			//System.out.println("Conversion factor is set" +priceRow.getUnitFactor());
 
 			//OctannerAutoLogin customLogin = new OctannerAutoLogin();
 			//customLogin.login(userid, userpass,request,response);
 
-		//final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(StringUtils.lowerCase(oCTannerAuthData.getUserId()), "1234");
+			//final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(StringUtils.lowerCase(oCTannerAuthData.getUserId()), "1234");
+
+
+			return user;
 		}
 
 		else
 		{
-		System.out.println("user does not exist in Hybris" + " " + oCTannerAuthData.getUserId());
-		throw new UsernameNotFoundException("user does not exist in Hybris"+oCTannerAuthData.getUserId());
-		}
+			System.out.println("user does not exist in Hybris" + " " +userid);
+			throw new UsernameNotFoundException("user does not exist in Hybris"+userid);
 
-		return user;
+		}
 
 	}
 
