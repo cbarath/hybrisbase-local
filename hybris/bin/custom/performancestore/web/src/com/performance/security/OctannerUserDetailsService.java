@@ -79,9 +79,6 @@ public class OctannerUserDetailsService implements UserDetailsService
 	@Autowired
 	public UserModel userModel;
 
-	//@Resource
-	//public CustomPriceRowModel customPriceRowModel;
-
 	@Autowired
 	public SessionService sessionService;
 
@@ -103,9 +100,19 @@ public class OctannerUserDetailsService implements UserDetailsService
 		String userid = u+"@"+x;                                            //User UID   //String userid = StringUtils.lowerCase(oCTannerAuthData.getUserId());
 		userModel = userService.getUserForUID(userid);
 
+		PriceRowModel priceRow = new PriceRowModel();    //modelService.create(PriceRowModel.class);
+		priceRow.setUnitFactor(Integer.valueOf(2));
+		System.out.println("unit factor is" +priceRow.getUnitFactor());
+
+		//final ProductModel currentProduct = (ProductModel)productService.getProductForCode("3881017").getEurope1Prices();
+		//System.out.println("product is "+currentProduct);
+
+
+
+
 		if((userService.isUserExisting(userid) && !(userModel.isLoginDisabled())))
 		{
-			System.out.println("bearrerToken recieved :: " +bearerToken);
+			System.out.println("bearrerToken recieved :: " + bearerToken);
 			UserDetails user = null;
 			try {
 				//oCTannerAuthData = getOCTTokenData(bearerToken);
@@ -172,9 +179,6 @@ public class OctannerUserDetailsService implements UserDetailsService
 
 			//OctannerAutoLogin customLogin = new OctannerAutoLogin();
 			//customLogin.login(userid, userpass,request,response);
-
-			//final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(StringUtils.lowerCase(oCTannerAuthData.getUserId()), "1234");
-
 
 			return user;
 		}
