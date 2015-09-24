@@ -105,7 +105,7 @@ public class OctannerUserDetailsService implements UserDetailsService
 		System.out.println("unit factor is" +priceRow.getUnitFactor());
 
 		//final ProductModel currentProduct = (ProductModel)productService.getProductForCode("3881017").getEurope1Prices();
-		//System.out.println("product is "+currentProduct);
+		//vvvv System.out.println("product is "+currentProduct);
 
 
 
